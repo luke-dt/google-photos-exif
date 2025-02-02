@@ -13,6 +13,31 @@ export function getCompanionJsonPathForMediaFile(mediaFilePath: string): string|
   const suffixRegex = new RegExp(`-(${CONFIG.localizedEditedSuffixes.join('|')})$`);
   mediaFileNameWithoutExtension = mediaFileNameWithoutExtension.replace(suffixRegex, '');
 
+  // The JSONs are somtimes appended `supplemental-metadata.json`, `supplemental.json`, `supp.json`, and many other variations
+  const suppVariations = [
+    ".supplemental",
+    ".supplementa",
+    ".supplement",
+    ".supplemen",
+    ".suppleme",
+    ".supplem",
+    ".supple",
+    ".suppl",
+    ".supp",
+    ".sup",
+    ".su",
+    ".s",
+    ".supplemental-metadata",
+    ".supplemental-metadat",
+    ".supplemental-metada",
+    ".supplemental-metad",
+    ".supplemental-meta",
+    ".supplemental-met",
+    ".supplemental-me",
+    ".supplemental-m",
+    ".supplemental-",
+  ];
+
   // The naming pattern for the JSON sidecar files provided by Google Takeout seem to be inconsistent. For `foo.jpg`,
   // the JSON file is sometimes `foo.json` but sometimes it's `foo.jpg.json`. Here we start building up a list of potential
   // JSON filenames so that we can try to find them later
@@ -21,6 +46,8 @@ export function getCompanionJsonPathForMediaFile(mediaFilePath: string): string|
     `${mediaFileNameWithoutExtension}${mediaFileExtension}.json`,
     `${mediaFileNameWithoutExtension}.jpg.json`,   // For videos that accompanied a motion photo
     `${mediaFileNameWithoutExtension}.HEIC.json`,   // For videos that accompanied a motion photo
+    ...suppVariations.map(suffix => `${mediaFileNameWithoutExtension}.${suffix}.json`),
+    ...suppVariations.map(suffix => `${mediaFileNameWithoutExtension}${mediaFileExtension}${suffix}.json`),
   ];
 
   // Another edge case which seems to be quite inconsistent occurs when we have media files containing a number suffix for example "foo(1).jpg"
@@ -28,10 +55,10 @@ export function getCompanionJsonPathForMediaFile(mediaFilePath: string): string|
   // We can use a regex to look for this edge case and add that to the potential JSON filenames to look out for
   const nameWithCounterMatch = mediaFileNameWithoutExtension.match(/(?<name>.*)(?<counter>\(\d+\))$/);
   if (nameWithCounterMatch) {
-    // We may have some edited files here too
+    // We may have some edited files here too, and suppVariations
     const name = nameWithCounterMatch?.groups?.['name'].replace(/[-]edited$/i, '');
     const counter = nameWithCounterMatch?.groups?.['counter'];
-    potentialJsonFileNames.push(`${name}${mediaFileExtension}${counter}.json`);
+    potentialJsonFileNames.push(`${name}${mediaFileExtension}${counter}.json`, ...suppVariations.map(suffix => `${name}${mediaFileExtension}${suffix}${counter}.json`));
     if (mediaFileExtension === '.MP4' || mediaFileExtension === '.mp4') {
       potentialJsonFileNames.push(`${name}.JPG${counter}.json`);
       potentialJsonFileNames.push(`${name}.jpg${counter}.json`);
@@ -62,6 +89,10 @@ export function getCompanionJsonPathForMediaFile(mediaFilePath: string): string|
     potentialJsonFileNames.push(`${mediaFileNameWithoutExtension}.jpg.json`);
     potentialJsonFileNames.push(`${mediaFileNameWithoutExtension}.jpeg.json`);
     potentialJsonFileNames.push(`${mediaFileNameWithoutExtension}.heic.json`);
+    potentialJsonFileNames.push(...suppVariations.map(suffix => `${mediaFileNameWithoutExtension}.JPG${suffix}.json`));
+    potentialJsonFileNames.push(...suppVariations.map(suffix => `${mediaFileNameWithoutExtension}.jpg${suffix}.json`));
+    potentialJsonFileNames.push(...suppVariations.map(suffix => `${mediaFileNameWithoutExtension}.jpeg${suffix}.json`));
+    potentialJsonFileNames.push(...suppVariations.map(suffix => `${mediaFileNameWithoutExtension}.heic${suffix}.json`));
   }
 
   // It seems like the length of json file names is capped at 47

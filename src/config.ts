@@ -12,7 +12,7 @@ export const CONFIG: Config = {
     { extension: '.m4v',  supportsExif: false },
     { extension: '.mkv',  supportsExif: true },
     { extension: '.mov',  supportsExif: true },
-    { extension: '.mp4',  supportsExif: false },
+    { extension: '.mp4',  supportsExif: true },
     { extension: '.png',  supportsExif: false },
     { extension: '.webp', supportsExif: false },
 
