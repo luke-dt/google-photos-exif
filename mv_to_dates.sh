@@ -18,6 +18,8 @@ for y in {2011..2025}; do
     # Ensure the directory exists before proceeding
     [[ -d "$dir" ]] || continue
 
+    echo "Processing $y..."
+
     # Change into the year directory
     pushd "$dir" > /dev/null || continue  
 
@@ -32,4 +34,6 @@ for y in {2011..2025}; do
 
     # Return to the original directory
     popd > /dev/null
+    
+    echo "Done!"
 done
